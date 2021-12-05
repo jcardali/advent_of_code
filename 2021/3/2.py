@@ -19,6 +19,7 @@ def get_rating(values, char1, char2):
             char = char2
 
         values = values.intersection(counts_map[idx][char])
+
         if len(values) == 1:
             return list(values)[0]
 
