@@ -1,7 +1,7 @@
-ONE_LEN = 2
-FOUR_LEN = 4
-SEVEN_LEN = 3
-EIGHT_LEN = 7
+ONE_LEN = len('cf')
+FOUR_LEN = len('bcdf')
+SEVEN_LEN = len('acf')
+EIGHT_LEN = len('abcdefg')
 
 count = 0
 with open("input.txt") as f:
