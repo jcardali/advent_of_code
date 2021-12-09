@@ -2,6 +2,7 @@ from shared import parse_input, is_lower
 
 height_map = parse_input()
 
+
 def find_basin_helper(row_idx, col_idx, height, current_basin):
     try:
         if row_idx >= 0 and col_idx >= 0 and height_map[row_idx][col_idx] > height and height_map[row_idx][col_idx] != 9:
