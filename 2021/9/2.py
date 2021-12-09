@@ -30,5 +30,3 @@ for row_idx, row in enumerate(height_map):
 
 biggest_three_basins = sorted(basins, key=len, reverse=True)[:3]
 print(len(biggest_three_basins[0]) * len(biggest_three_basins[1]) * len(biggest_three_basins[2]))
-
-
