@@ -18,16 +18,19 @@ func parseInstruction(s string) (int, string, string) {
 	return count, split[3], split[5]
 }
 
-func executeInstruction(stacks Stacks, count int, from string, to string) {
+func executeCM9000Instruction(stacks Stacks, count int, from string, to string) {
 	for i := 0; i < count; i++ {
-		// fmt.Println(stacks)
 		crate := stacks[from][0]
 		stacks[from] = stacks[from][1:]
-		// fmt.Println(crate)
-		// fmt.Println(updatedFromStack)
 		stacks[to] = append(Stack{crate}, stacks[to]...)
-		// fmt.Println(stacks)
 	}
+}
+
+func executeCM9001Instruction(stacks Stacks, count int, from string, to string) {
+	var stack = make(Stack, count)
+	copy(stack, stacks[from][:count])
+	stacks[from] = stacks[from][count:]
+	stacks[to] = append(stack, stacks[to]...)
 }
 
 func main() {
@@ -38,7 +41,7 @@ func main() {
 	scanner := bufio.NewScanner(f)
 	var instructions []string
 	var numStacks int
-	var stacks = Stacks{}
+	var stacks, stacks2 = Stacks{}, Stacks{}
 
 	for scanner.Scan() {
 		row := scanner.Text()
@@ -46,20 +49,18 @@ func main() {
 		if row == "" {
 			numberRow := instructions[len(instructions)-2]
 			numStacks, _ = strconv.Atoi(string(numberRow[len(numberRow)-2]))
-			// fmt.Println(numStacks)
 			for i := 0; i < numStacks; i++ {
-				stacks[strconv.Itoa(i+1)] = Stack{}
+				key := strconv.Itoa(i + 1)
+				stacks[key], stacks2[key] = Stack{}, Stack{}
 			}
-			// fmt.Println(stacks)
 			for _, instruction := range instructions {
 				for i, charInt := range instruction {
+					// Ignore whitespace + brackets
 					if charInt >= 65 && charInt <= 90 {
-						// fmt.Println(i)
+						// Crates are four characters
 						key := strconv.Itoa((i / 4) + 1)
-						if key == "0" {
-							key = strconv.Itoa(numStacks)
-						}
-						stacks[key] = append(stacks[key], string(charInt))
+						charStr := string(charInt)
+						stacks[key], stacks2[key] = append(stacks[key], charStr), append(stacks2[key], charStr)
 					}
 				}
 			}
@@ -68,12 +69,15 @@ func main() {
 	}
 	for _, instruction := range instructions {
 		count, from, to := parseInstruction(instruction)
-		// fmt.Println(instruction)
-		executeInstruction(stacks, count, from, to)
+		executeCM9000Instruction(stacks, count, from, to)
+		executeCM9001Instruction(stacks2, count, from, to)
 	}
-	out := ""
+	out, out2 := "", ""
 	for i := 0; i < numStacks; i++ {
-		out += stacks[strconv.Itoa(i+1)][0]
+		key := strconv.Itoa(i + 1)
+		out += stacks[key][0]
+		out2 += stacks2[key][0]
 	}
 	fmt.Println(out)
+	fmt.Println(out2)
 }
