@@ -35,8 +35,6 @@ type FileSystem map[string]*Directory
 func cd(directoryName string, currentDir string, fileSystem FileSystem) string {
 	if directoryName == ".." {
 		currentDir = fileSystem[currentDir].parent
-	} else if directoryName == "/" {
-		currentDir = "/"
 	} else {
 		currentDir = directoryName
 	}
@@ -90,9 +88,6 @@ func main() {
 			if split[1] == "cd" {
 				currentDir = cd(split[2], currentDir, fileSystem)
 			}
-			//} else if split[1] == "ls" {
-			//	ls(currentDir, fileSystem)
-			//}
 		} else if string(split[0]) == "dir" {
 			dir(split[1], currentDir, fileSystem)
 		} else {
