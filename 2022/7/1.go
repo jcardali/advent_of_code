@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -70,7 +71,7 @@ func main() {
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
-	currentPath := []string{}
+	var currentPath []string
 	fileSystem := FileSystem{"/": &Directory{name: "/", parent: "/", size: 0, files: []File{}, childDirectories: []string{}}}
 
 	for scanner.Scan() {
@@ -88,6 +89,12 @@ func main() {
 	}
 
 	totalSize := 0
+	rootSize := computeSize(fileSystem["/"], fileSystem)
+	const DiskSpace = 70000000
+	const NeededSpace = 30000000
+	unusedSpace := DiskSpace - rootSize
+	spaceToFree := NeededSpace - unusedSpace
+	var deletionCandidates []int
 
 	for _, directory := range fileSystem {
 		size := computeSize(directory, fileSystem)
@@ -95,6 +102,12 @@ func main() {
 		if size <= 100000 {
 			totalSize += size
 		}
+
+		if size >= spaceToFree {
+			deletionCandidates = append(deletionCandidates, size)
+		}
 	}
-	fmt.Println(totalSize)
+	fmt.Printf("Part 1: %d\n", totalSize)
+	sort.Ints(deletionCandidates)
+	fmt.Printf("Part 2: %d\n", deletionCandidates[0])
 }
