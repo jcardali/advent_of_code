@@ -23,44 +23,36 @@ type Directory struct {
 }
 
 func (f *File) String() string {
-	return fmt.Sprintf("File{name:%s, size:%d, parent:%s}\n", f.name, f.size, f.parent)
+	return fmt.Sprintf("File{name:%s, size:%d, parent:%s}", f.name, f.size, f.parent)
 }
 
 func (d *Directory) String() string {
-	return fmt.Sprintf("Directory{name:%s, parent:%s, childDirectories:%s, files:%v}\n", d.name, d.parent, d.childDirectories, d.files)
+	return fmt.Sprintf("Directory{name:%s, parent:%s, childDirectories:%s, files:%v}", d.name, d.parent, d.childDirectories, d.files)
 }
 
 type FileSystem map[string]*Directory
 
-func cd(directoryName string, currentDir string, fileSystem FileSystem) string {
+func cd(directoryName string, currentPath []string) []string {
 	if directoryName == ".." {
-		currentDir = fileSystem[currentDir].parent
+		return currentPath[:len(currentPath)-1]
 	} else {
-		currentDir = directoryName
+		return append(currentPath, directoryName)
 	}
-	return currentDir
 }
 
-func dir(directoryName string, currentDir string, fileSystem FileSystem) {
-	fileSystem[directoryName] = &Directory{name: directoryName, parent: currentDir, size: 0, files: []File{}, childDirectories: []string{}}
-	fileSystem[currentDir].childDirectories = append(fileSystem[currentDir].childDirectories, directoryName)
+func dir(directoryName string, currentPath []string, fileSystem FileSystem) {
+	oldPath := strings.Join(currentPath, "/")
+	path := strings.Join(append(currentPath, directoryName), "/")
+	fileSystem[path] = &Directory{name: directoryName, parent: currentPath[len(currentPath)-1], size: 0, files: []File{}, childDirectories: []string{}}
+	fileSystem[oldPath].childDirectories = append(fileSystem[oldPath].childDirectories, path)
 }
 
-func addFile(fileName string, fileSize string, currentDir string, fileSystem FileSystem) {
+func addFile(fileName string, fileSize string, currentPath []string, fileSystem FileSystem) {
+	path := strings.Join(currentPath, "/")
 	fileSizeInt, _ := strconv.Atoi(fileSize)
-	fileSystem[currentDir].files = append(fileSystem[currentDir].files, File{name: fileName, size: fileSizeInt})
-	fileSystem[currentDir].size += fileSizeInt
+	fileSystem[path].files = append(fileSystem[path].files, File{name: fileName, size: fileSizeInt})
+	fileSystem[path].size += fileSizeInt
 }
-
-//func ls(currentDir string, fileSystem FileSystem) {
-//	fmt.Println("here")
-//	for _, file := range fileSystem[currentDir].files {
-//		fmt.Printf("%d %s\n", file.size, file.name)
-//	}
-//	for _, directory := range fileSystem[currentDir].childDirectories {
-//		fmt.Printf("dir %s\n", directory)
-//	}
-//}
 
 func computeSize(directory *Directory, fileSystem FileSystem) int {
 	size := directory.size
@@ -78,7 +70,7 @@ func main() {
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
-	currentDir := "/"
+	currentPath := []string{}
 	fileSystem := FileSystem{"/": &Directory{name: "/", parent: "/", size: 0, files: []File{}, childDirectories: []string{}}}
 
 	for scanner.Scan() {
@@ -86,15 +78,14 @@ func main() {
 		split := strings.Split(command, " ")
 		if string(split[0]) == "$" {
 			if split[1] == "cd" {
-				currentDir = cd(split[2], currentDir, fileSystem)
+				currentPath = cd(split[2], currentPath)
 			}
 		} else if string(split[0]) == "dir" {
-			dir(split[1], currentDir, fileSystem)
+			dir(split[1], currentPath, fileSystem)
 		} else {
-			addFile(split[1], split[0], currentDir, fileSystem)
+			addFile(split[1], split[0], currentPath, fileSystem)
 		}
 	}
-	fmt.Println(fileSystem)
 
 	totalSize := 0
 
@@ -102,10 +93,8 @@ func main() {
 		size := computeSize(directory, fileSystem)
 
 		if size <= 100000 {
-			fmt.Println(directory.name, size)
 			totalSize += size
 		}
 	}
-	// 1089720 is low
 	fmt.Println(totalSize)
 }
