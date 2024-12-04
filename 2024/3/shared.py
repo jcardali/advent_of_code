@@ -1,6 +1,5 @@
 MUL_PATTERN = r'mul\(\d{1,3},\d{1,3}\)'
-DO_PATTERN = r'do\()'
-DONT_PATTERN = r'don\'t\()'
+MUL_DO_DONT_PATTERN = r'(mul\(\d{1,3},\d{1,3}\))|(do\(\))|(don\'t\(\))'
 
 def do_mul(match):
     match = match.replace("mul(", "").replace(")", "")
