@@ -16,17 +16,14 @@ for idx, report in enumerate(reports):
             prev = level
             continue
         diff = level - prev
+        prev = level
         if is_increasing is None:
             is_increasing = diff > 0
-        if is_increasing and diff <= 0:
-            # print(idx, prev, level, diff)
-            is_safe = False
-        if not is_increasing and diff >= 0:
+        if (is_increasing and diff <= 0) or (not is_increasing and diff >= 0):
             is_safe = False
         abs_diff = abs(diff)
         if abs_diff < 1 or abs_diff > 3:
             is_safe = False
-        prev = level
 
     if is_safe:
         count += 1
